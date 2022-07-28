@@ -7,16 +7,16 @@ import java.io.PrintStream;
  */
 public class Hello {
 
-    static final String HELLO = "Hello!";
+    static final String HELLO = "Hello Raghu";
     public static final int MAXIMUM_AMOUNT_OF_TIMES = 20;
     private short times = 1;
 
     /**
      * Set how many times "Hello!" should be said.
      *
-     * @param times How many times should this class say "Hello!"? 
+     * @param times How many times should this class say "Hello!"?
      * The value should be no larger than 20.
-     * @throws IllegalArgumentException Thrown when times is larger 
+     * @throws IllegalArgumentException Thrown when times is larger
      * than 20 or a negative number.
      */
     public void setTimes(int times) {
