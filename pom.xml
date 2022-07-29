@@ -136,7 +136,7 @@
     <repository>
       <id>deployment</id>
       <name>my repository</name>
-      <url>http://13.126.171.116:8081/repository/maven-releases/</url>
+      <url>http:http://13.126.171.116:8081/repository/maven-releases/</url>
     </repository>
   </distributionManagement>
 </project>
