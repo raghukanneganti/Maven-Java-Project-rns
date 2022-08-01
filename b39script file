@@ -1,0 +1,116 @@
+pipeline {
+    agent {
+        label "buildserver"
+    }
+
+    tools{
+        maven 'maven3.8'
+    }
+
+    stages {
+        stage('Preparation') {
+
+            steps {
+                echo "Integrating with Git HubRepo"
+                git credentialsId: 'github_credentials', url: 'https://github.com/venkat09docs/Maven-Java-Project.git'
+            }
+        }
+
+        stage('Compile') {
+
+            steps {
+                echo 'Compiling Source Code'
+                sh "mvn clean compile"
+            }
+            post{
+                changed{
+                    emailext(
+                        to: 'venkat09docs@gmail.com',
+                        subject: "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                        body: "details",
+                        recipientProviders: [[$class: 'DevelopersRecipientProvider']]
+                    )
+                }
+            }
+        }
+
+        stage('Unit-Test-Cases') {
+
+            steps {
+                echo 'Running Unit Test Cases'
+                sh "mvn clean test"
+            }
+            post{
+                changed{
+                    emailext(
+                        to: 'venkat09docs@gmail.com',
+                        subject: "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                        body: "details",
+                        recipientProviders: [[$class: 'DevelopersRecipientProvider']]
+                    )
+                }
+                success{
+                    junit '**/target/surefire-reports/*.xml'
+                }
+            }
+        }
+
+        stage('Packaging') {
+
+            steps {
+                echo 'Creating Artifacts'
+                sh "mvn clean package -DskipTests"
+            }
+            post{
+                changed{
+                    emailext(
+                        to: 'venkat09docs@gmail.com',
+                        subject: "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                        body: "details",
+                        recipientProviders: [[$class: 'DevelopersRecipientProvider']]
+                    )
+                }
+                success{
+                    echo 'Archive the Artifacts'
+                    archiveArtifacts artifacts: '**/target/*.war', followSymlinks: false
+                }
+            }
+        }
+
+        stage('Deployment') {
+
+            steps {
+                echo 'Deploying Artifact to the Staging Server'
+                deploy adapters: [tomcat9(credentialsId: 'appserver_credentials', path: '', url: 'http://18.170.92.88:8090/')], contextPath: 'webapp', onFailure: false, war: 'target/*.war'
+            }
+            post{
+                changed{
+                    emailext(
+                        to: 'venkat09docs@gmail.com',
+                        subject: "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                        body: "details",
+                        recipientProviders: [[$class: 'DevelopersRecipientProvider']]
+                    )
+                }
+            }
+        }
+
+        stage('Integration Testing') {
+
+            steps {
+                echo 'Running IT Test Cases'
+                sh "mvn clean verify -DskipTests"
+            }
+            post{
+                changed{
+                    emailext(
+                        to: 'venkat09docs@gmail.com',
+                        subject: "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                        body: "details",
+                        recipientProviders: [[$class: 'DevelopersRecipientProvider']]
+                    )
+                }
+            }
+        }
+    }
+}
